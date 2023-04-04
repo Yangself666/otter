@@ -401,6 +401,17 @@
 			<field name="pipelineId" displayName="所属pipeline" />
 		</group>
 
+		<!-- - ======== - batchDataMediaPair info - ======== -->
+		<group name="batchDataMediaInfo" extends="csrfCheck">
+			<field name="formBatchDataMediaError">
+				<fm-validators:custom-error id="invalidBatchDataMedia">
+					<message>批量导入失败，请检查配置文档，可能原因:文档字段缺失或者sourceId不存在</message>
+				</fm-validators:custom-error>
+			</field>
+			<field name="batchContent" displayName="批量导入大本文">
+			</field>
+		</group>
+
 		<!-- - ======== - node info - ======== -->
 		<group name="nodeInfo" extends="csrfCheck">
 			<field name="formNodeError">

@@ -25,6 +25,7 @@ import com.alibaba.citrus.turbine.dataresolver.FormField;
 import com.alibaba.citrus.turbine.dataresolver.FormGroup;
 import com.alibaba.citrus.turbine.dataresolver.Param;
 import com.alibaba.citrus.webx.WebxException;
+import com.alibaba.otter.manager.biz.common.exceptions.ManagerException;
 import com.alibaba.otter.manager.biz.common.exceptions.RepeatConfigureException;
 import com.alibaba.otter.manager.biz.config.datamedia.DataMediaService;
 import com.alibaba.otter.manager.biz.config.datamediapair.DataMediaPairService;
@@ -34,8 +35,14 @@ import com.alibaba.otter.shared.common.model.config.data.DataMedia;
 import com.alibaba.otter.shared.common.model.config.data.DataMediaSource;
 import com.alibaba.otter.shared.common.model.config.data.db.DbMediaSource;
 import com.alibaba.otter.shared.common.model.config.data.mq.MqMediaSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.List;
 public class DataMediaAction extends AbstractAction {
+
+    private static final Logger logger         = LoggerFactory.getLogger(DataMediaAction.class);
 
     @Resource(name = "dataMediaService")
     private DataMediaService       dataMediaService;
@@ -74,6 +81,50 @@ public class DataMediaAction extends AbstractAction {
         }
 
         nav.redirectTo(WebConstant.DATA_MEDIA_LIST_LINK);
+    }
+
+    /**
+     * 批量添加数据表
+     * @param batchDataMediaInfo 批量数据表信息
+     * @throws Exception
+     */
+    public void doBatchAdd(@FormGroup("batchDataMediaInfo") Group batchDataMediaInfo,
+                      @FormField(name = "formBatchDataMediaError", group = "batchDataMediaInfo") CustomErrors err, Navigator nav)
+                                                                                                                       throws Exception {
+        String batchContent = batchDataMediaInfo.getField("batchContent").getStringValue();
+        List<String> dataMedias = Arrays.asList(batchContent.split("\r\n"));
+
+        try {
+            for (String dataMedia : dataMedias) {
+                List<String> mediaData = Arrays.asList(dataMedia.split(","));
+                if (mediaData.size() < 3) {
+                    throw new ManagerException("[" + dataMedia + "] the line not all parameters");
+                }
+                // 开始添加
+                DataMedia newDataMedia = new DataMedia();
+                // 查找数据源信息
+                DataMediaSource dataMediaSource = dataMediaSourceService.findById(Long.parseLong(mediaData.get(2)));
+                // 判断数据源类型
+                if (dataMediaSource.getType().isMysql() || dataMediaSource.getType().isOracle()) {
+                    newDataMedia.setSource((DbMediaSource) dataMediaSource);
+                } else if (dataMediaSource.getType().isNapoli() || dataMediaSource.getType().isMq()) {
+                    newDataMedia.setSource((MqMediaSource) dataMediaSource);
+                }
+                newDataMedia.setNamespace(mediaData.get(0));
+                newDataMedia.setName(mediaData.get(1));
+                try {
+                    // 开始添加
+                    dataMediaService.create(newDataMedia);
+                }catch (RepeatConfigureException e){
+                    logger.info("{}.{} 数据表重复，不添加",mediaData.get(0), mediaData.get(1));
+                }
+            }
+
+        } catch (Exception e) {
+            err.setMessage("invalidBatchDataMedia");
+            return;
+        }
+        nav.redirectToLocation("data_media_list.htm");
     }
 
     /**
