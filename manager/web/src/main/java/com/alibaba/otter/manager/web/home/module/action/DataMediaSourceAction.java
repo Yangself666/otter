@@ -58,7 +58,7 @@ public class DataMediaSourceAction extends AbstractAction {
             DbMediaSource dbMediaSource = new DbMediaSource();
             dataMediaSourceInfo.setProperties(dbMediaSource);
             if (dataMediaSource.getType().isMysql()) {
-                dbMediaSource.setDriver("com.mysql.jdbc.Driver");
+                dbMediaSource.setDriver("com.mysql.cj.jdbc.Driver");
             } else if (dataMediaSource.getType().isOracle()) {
                 dbMediaSource.setDriver("oracle.jdbc.driver.OracleDriver");
             }
@@ -104,7 +104,7 @@ public class DataMediaSourceAction extends AbstractAction {
         dataMediaSourceInfo.setProperties(dbMediaSource);
 
         if (dbMediaSource.getType().isMysql()) {
-            dbMediaSource.setDriver("com.mysql.jdbc.Driver");
+            dbMediaSource.setDriver("com.mysql.cj.jdbc.Driver");
         } else if (dbMediaSource.getType().isOracle()) {
             dbMediaSource.setDriver("oracle.jdbc.driver.OracleDriver");
         }

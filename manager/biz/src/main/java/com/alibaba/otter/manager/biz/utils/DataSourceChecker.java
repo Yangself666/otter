@@ -137,7 +137,7 @@ public class DataSourceChecker {
 
             if (sourceType.equalsIgnoreCase("MYSQL")) {
                 dbMediaSource.setType(DataMediaType.MYSQL);
-                dbMediaSource.setDriver("com.mysql.jdbc.Driver");
+                dbMediaSource.setDriver("com.mysql.cj.jdbc.Driver");
             } else if (sourceType.equalsIgnoreCase("ORACLE")) {
                 dbMediaSource.setType(DataMediaType.ORACLE);
                 dbMediaSource.setDriver("oracle.jdbc.driver.OracleDriver");
